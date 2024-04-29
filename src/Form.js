@@ -59,6 +59,8 @@ function Form() {
             required
           />
           <button>Submit</button>
+          {`width = ${window.innerWidth} height = ${window.innerHeight}`}
+          {}
         </form>
       </div>
     </div>
