@@ -18,7 +18,7 @@ function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="*" element={<NoPage />} />  */}
         <Route path="/" element={<Form />} />
-        <Route path="card" element={<Second />} />
+        <Route path="card" element={<Youtube />} />
         <Route path="img" element={<IMgg />} />
         <Route path="users" element={<Users />} />
         <Route path="yt" element={<Youtube />} />

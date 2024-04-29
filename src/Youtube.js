@@ -25,9 +25,9 @@ function Youtube() {
       document.querySelector(".App").style.opacity = "100%";
       // document.querySelector(".txt").style.fontSize = "30px";
       if (idx == 0) {
-        document.querySelector("canvas").style.left = "50%";
+        document.querySelector("canvas").style.left = "40%";
         document.querySelector(".imgg").style.position = "absolute";
-        document.querySelector(".imgg").style.left = "50%";
+        document.querySelector(".imgg").style.left = "40%";
         document.querySelector(".imgg").style.height = "200px";
         document.querySelector(".imgg").style.width = "200px";
         // document.querySelector(".txt").style.left = "100%";

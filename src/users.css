@@ -1,0 +1,26 @@
+body{
+    min-height: 40vh;
+    text-align: center;
+    margin-left: 10%;
+}
+
+table {
+    /* width: 800px; */
+    /* height: 200px; */
+    border-collapse: collapse;
+    align-self: center;
+  }
+  
+  th {
+    border-bottom: 1px solid black;
+    border: 2px solid black;
+  }
+  
+  td {
+    text-align: center;
+    border: 2px solid black;
+  }
+
+  td{
+    padding: 15px;
+  }
