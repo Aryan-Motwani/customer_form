@@ -12,9 +12,9 @@ function Form() {
   useEffect(() => {
     setTimeout(() => {
       if (window.innerWidth <= 500) {
-        document.querySelector(".card").style.marginLeft = "25%";
+        // document.querySelector(".card").style.marginLeft = "25%";
       } else {
-        document.querySelector(".card").style.marginLeft = "250%";
+        // document.querySelector(".card").style.marginLeft = "250%";
       }
     }, 1000);
   }, []);

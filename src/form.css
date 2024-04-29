@@ -11,7 +11,7 @@ body {
   
   .container {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
   }
   
   .card {
@@ -20,8 +20,25 @@ body {
     padding: 20px;
     border-radius: 12px; /* Border radius card */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-left: 250%;
     margin-top: 20%;
+  }
+
+  @media (max-width : 500px) {
+    .card{
+      margin-left: 25%;
+    }
+  }
+  
+  @media (max-width : 400px) {
+    .card{
+      margin-left: 15%;
+    }
+  }
+
+  @media (max-width : 400px) {
+    .card{
+      margin-left: 5%;
+    }
   }
   
   h2 {
