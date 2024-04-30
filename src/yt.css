@@ -1,0 +1,16 @@
+body{
+    overflow: visible;
+
+}
+
+@media (max-width : 500px) {
+    canvas{
+      margin-left: -100%;
+    }
+    .imgg{
+        position: absolute;
+      margin-left: -50%;
+      height: 200px;
+      width: 200px;
+    }
+  }
