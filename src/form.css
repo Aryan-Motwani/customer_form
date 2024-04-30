@@ -5,7 +5,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background:  #FFFDD0; /* Warna latar belakang abu-abu muda */
+    background: #b8bf97; /* Warna latar belakang abu-abu muda */
     color: #333;
   }
   
@@ -20,7 +20,7 @@ body {
     padding: 20px;
     border-radius: 12px; /* Border radius card */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 20%;
+    margin-top: 50%;
     margin-left: -50%;
   }
 
