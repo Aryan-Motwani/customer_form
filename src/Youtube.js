@@ -3,6 +3,7 @@ import couponCover from "./blue_card.png";
 import squareImg from "./square.png";
 import sample from "./sample.jpeg";
 import { useEffect, useState } from "react";
+import "./yt.css";
 
 function Youtube() {
   let decider = [
