@@ -21,11 +21,14 @@ body {
     border-radius: 12px; /* Border radius card */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin-top: 20%;
+    margin-left: -50%;
   }
+
+  
 
   @media (max-width : 500px) {
     .card{
-      margin-left: -20%;
+      margin-left: -25%;
     }
   }
   

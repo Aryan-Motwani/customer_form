@@ -24,3 +24,13 @@ table {
   td{
     padding: 15px;
   }
+
+  @media (width > 500px) {
+    .users-main h1{
+      margin-left: -100%;
+    }
+
+    table{
+      margin-left: -50%;
+    }
+  }

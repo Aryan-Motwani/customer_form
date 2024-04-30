@@ -3,13 +3,24 @@ body{
 
 }
 
+canvas{
+    margin-left: -100%;
+    margin-top: 10%;
+}
+.imgg{
+    position: absolute;
+  margin-left: -50%;
+  height: 500px;
+  width: 500px;
+}
+
 @media (max-width : 500px) {
     canvas{
-      margin-left: -100%;
+      margin-left: -120%;
     }
     .imgg{
-        position: absolute;
-      margin-left: -50%;
+      position: absolute;
+      margin-left: -70%;
       height: 200px;
       width: 200px;
     }
