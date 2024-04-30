@@ -9,16 +9,6 @@ function Form() {
   const [num, setNum] = useState("");
   const [dob, setDob] = useState();
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (window.innerWidth <= 500) {
-        // document.querySelector(".card").style.marginLeft = "25%";
-      } else {
-        // document.querySelector(".card").style.marginLeft = "250%";
-      }
-    }, 1000);
-  }, []);
-
   let handleSubmit = async (e) => {
     e.preventDefault();
     const doc = await addDoc(collection(db, "users"), {
@@ -59,7 +49,7 @@ function Form() {
             required
           />
           <button>Submit</button>
-          {`width = ${window.innerWidth} height = ${window.innerHeight}`}
+          {`width = ${window.innerWidth} height = ${window.innerHeight} `}
           {}
         </form>
       </div>
