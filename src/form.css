@@ -5,7 +5,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: #fafafa; /* Warna latar belakang abu-abu muda */
+    background:  #FFFDD0; /* Warna latar belakang abu-abu muda */
     color: #333;
   }
   
@@ -28,14 +28,13 @@ body {
 
   @media (max-width : 500px) {
     .card{
-      margin-left: -25%;
+      margin-left: -10%;
     }
   }
   
   @media (max-width : 400px) {
     .card{
       margin-left: -20%;
-
     }
   }
 
