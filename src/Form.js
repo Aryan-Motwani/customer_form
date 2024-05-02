@@ -30,7 +30,7 @@ function Form() {
             name="username"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Name"
+            placeholder="Namee"
             required
           />
           <input
