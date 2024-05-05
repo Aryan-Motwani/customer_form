@@ -1,24 +1,10 @@
-import React from "react";
-import "./styles.css";
-import Form from "./Form";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Second from "./Second";
-import IMgg from "./ImgProp";
-import Users from "./Users";
-import Youtube from "./Youtube";
-import NewForm from "./NewForm";
-import { useState, useEffect } from "react";
-
-
-useEffect(() => {
-    window.href = "https://profile-ruddy-delta.vercel.app/"
-  });
-
+import React, { useEffect } from "react";
 
 function App() {
-  return (
-    <div></div>
-  );
+  useEffect(() => {
+    window.location = "https://profile-ruddy-delta.vercel.app/";
+  }, []);
+  return <div>App</div>;
 }
 
 export default App;
