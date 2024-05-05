@@ -4,7 +4,7 @@ function App() {
   useEffect(() => {
     window.location = "https://profile-ruddy-delta.vercel.app/";
   }, []);
-  return <div>App</div>;
+  return <div></div>;
 }
 
 export default App;
