@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        iframe {
+            height: 500px;
+            width: 80%;
+            margin: 0 10%;
+        }
+    </style>
+</head>
+
+<body>
+    <iframe id="coohomIframe"
+        src="https://www.coohom.com/pub/tool/panorama/aiwalking?obsPlanId=3FO3QNNA5G17&utm_source=smart720_share&uri=%2Fpub%2Fsaas%2Fapps%2Fproject%2Fdetail%2F3FO3QNNA5G17%3Fuid%3D3FO4LKCSB9FQ&utm_content=3FO3QNNA5G17&utm_medium=linkcopy"
+        frameborder="0"></iframe>
+
+    <script>
+        document.getElementById('coohomIframe').onload = function () {
+            // const iframe = document.getElementById('coohomIframe').contentWindow.document;
+            // const images = iframe.getElementsByTagName('img');
+            // for (let img of images) {
+            //     img.style.visibility = 'hidden';
+            // }
+            setInterval(() => {
+
+                document.querySelectorAll('img').forEach(i => {
+                    i.style.display = 'none'
+                })
+                // console.log("loaded");
+            }, 1000);
+        };
+    </script>
+</body>
+
+</html>
