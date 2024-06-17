@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .container {
+        text-align: center;
+    }
+
+    td,
+    th,
+    tr,
+    thead,
+    table {
+        border: 1px solid black;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <button onclick="randomize()">Randomize</button>
+        <button onclick="showAll()">Show All</button>
+        <button onclick="hideAll()">Hide All</button>
+
+        <table align="center">
+            <thead>
+                <th>Hiragana</th>
+                <th>Romanji</th>
+                <th>Meaning</th>
+            </thead>
+        </table>
+    </div>
+</body>
+<script>
+    const vocabulary = [
+        ["I", "watashi", "わたし"],
+        ["we", "watashitachi", "わたしたち"],
+        ["you", "anata", "あなた"],
+        ["that person", "anohito/anokata", "あのひと・あのかた"],
+        ["everyone", "minasan", "みなさん"],
+        ["Mr./Mrs.", "-san", "さん"],
+        ["suffix added to a child’s name", "-chan", "ちゃん"],
+        ["suffix added to a boy’s name", "-kun", "くん"],
+        ["a nationality of", "-jin", "じん"],
+        ["teacher (referring to others)", "sensei", "せんせい"],
+        ["teacher (referring to one’s own job)", "kyoushi", "きょうし"],
+        ["student", "gakusei", "がくせい"],
+        ["company employee", "kaishain", "かいしゃいん"],
+        ["employee", "shain", "しゃいん"],
+        ["bank employee", "ginkouin", "ぎんこういん"],
+        ["doctor", "isha", "いしゃ"],
+        ["researcher", "kenyuusha", "けんきゅうしゃ"],
+        ["engineer", "enjinia", "エンジニア"],
+        ["university", "daigaku", "だいがく"],
+        ["hospital", "byouin", "びょういん"],
+        ["electricity, light", "denki", "でんき"],
+        ["who", "dare/donata", "だれ・どなた"],
+        ["-years old", "-sai", "さい"],
+        ["how old", "nansai/oikutsu", "なんさい・おいくつ"],
+        ["yes", "hai", "はい"],
+        ["no", "iie", "いいえ"],
+        ["excuse me, but", "shitsureidesuga", "しつれいですが"],
+        ["what’s your name? informal", "onamae wa", "おなまえは"],
+        ["how do you do? introducing oneself for the first time", "hajimemashite", "はじめまして"],
+        ["Pleased to meet you.", "douzo yoroshiku onegaishimasu", "どうぞよろしくおねがいします"],
+        ["This is (someone)", "kochira wa-san desu.", "こちらはーさんです。"],
+        ["I’m from (country)", "-karakimashita", "からきました"],
+        ["America", "amerika", "アメリカ"],
+        ["U.K.", "igirisu", "イギリス"],
+        ["India", "indo", "インド"],
+        ["Indonesia", "indoneshia", "インドネシア"],
+        ["Korea", "kankoku", "かんこく"],
+        ["Thailand", "tai", "たい"],
+        ["Germany", "doitsu", "ドイツ"],
+        ["France", "furansu", "フランス"],
+        ["Brazil", "burajiru", "ブラジル"],
+        ["Japan", "nihon", "にほん"],
+        ["Philippines", "firipin", "フィリピン"]
+    ];
+
+    let render = () => {
+        document.querySelector('table').innerHTML = `<thead>
+                <th>Hiragana</th>
+                <th>Romanji</th>
+                <th>Meaning</th>
+            </thead>`
+        vocabulary.forEach(i => {
+            document.querySelector('table').innerHTML += `<tr>
+                <td>${i[2]}</td>
+                <td class="romanji">${i[1]}</td>
+                <td class="romanji">${i[0]}</td>
+                </tr>`
+        })
+    }
+
+    render()
+    let makeHidable = () => {
+
+        document.querySelectorAll('.romanji').forEach(i => {
+            i.addEventListener('click', () => {
+                if (i.style.opacity == '' || i.style.opacity == 1) {
+                    i.style.opacity = 0;
+                } else {
+                    i.style.opacity = 1;
+                }
+            })
+        })
+    }
+
+    let hideAll = () => {
+        document.querySelectorAll('.romanji').forEach(i => {
+            i.style.opacity = 0
+        })
+    }
+    let showAll = () => {
+        document.querySelectorAll('.romanji').forEach(i => {
+            i.style.opacity = 1
+        })
+    }
+    function shuffle(array) {
+        let currentIndex = array.length;
+
+        // While there remain elements to shuffle...
+        while (currentIndex != 0) {
+
+            // Pick a remaining element...
+            let randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+    }
+
+    let randomize = () => {
+        shuffle(vocabulary)
+        render()
+        makeHidable()
+        hideAll()
+    }
+    makeHidable()
+    hideAll()
+
+</script>
+
+</html>
