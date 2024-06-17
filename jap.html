@@ -25,6 +25,11 @@
     th {
         padding: 10px;
     }
+
+    .active {
+        background: blue;
+        color: white;
+    }
 </style>
 
 <body>
@@ -32,6 +37,10 @@
         <button onclick="randomize()">Randomize</button>
         <button onclick="showAll()">Show All</button>
         <button onclick="hideAll()">Hide All</button>
+        <p></p>
+        <button class="page active">1</button>
+        <button class="page">2</button>
+        <p></p>
 
         <table align="center">
             <thead>
@@ -43,7 +52,7 @@
     </div>
 </body>
 <script>
-    const vocabulary = [
+    const data = [[
         ["I", "watashi", "わたし"],
         ["we", "watashitachi", "わたしたち"],
         ["you", "anata", "あなた"],
@@ -87,8 +96,75 @@
         ["Brazil", "burajiru", "ブラジル"],
         ["Japan", "nihon", "にほん"],
         ["Philippines", "firipin", "フィリピン"]
-    ];
+    ], [
+        ["this", "kore", "これ"],
+        ["that (thing near you)", "sore", "それ"],
+        ["that (thing over there)", "are", "あれ"],
+        ["this (noun) here", "kono~", "この〜"],
+        ["that (noun) near you", "sono~", "その〜"],
+        ["that (noun) over there", "ano~", "あの〜"],
+        ["book", "hon", "ほん"],
+        ["dictionary", "jisho", "じしょ"],
+        ["magazine", "zasshi", "ざっし"],
+        ["newspaper", "shinbun", "しんぶん"],
+        ["notebook", "nooto", "ノート"],
+        ["pocket notebook", "techou", "てちょう"],
+        ["business card", "meishi", "めいし"],
+        ["card", "kaado", "カード"],
+        ["telephone card", "terehonkaado", "テレホンカード"],
+        ["pencil", "enpitsu", "えんぴつ"],
+        ["ballpoint pen", "boorupen", "ボールペン"],
+        ["mechanical pencil", "shaapupenshiru", "シャープペンシル"],
+        ["key", "kagi", "かぎ"],
+        ["watch/clock", "tokei", "とけい"],
+        ["umbrella", "kasa", "かさ"],
+        ["bag/briefcase", "kaban", "かばん"],
+        ["(cassette) tape", "(kasetto) teepu", "（カセット）テープ"],
+        ["tape recorder", "teepurekoodaa", "テープレコーダー"],
+        ["television", "terebi", "テレビ"],
+        ["radio", "rajio", "ラジオ"],
+        ["camera", "kamera", "カメラ"],
+        ["computer", "konpyuutaa", "コンピューター"],
+        ["automobile/car", "jidousha", "じどうしゃ"],
+        ["desk", "tsukue", "つくえ"],
+        ["chair", "isu", "いす"],
+        ["chocolate", "chokoreeto", "チョコレート"],
+        ["coffee", "koohii", "コーヒー"],
+        ["the English language", "eigo", "えいご"],
+        ["the Japanese language", "nihongo", "にほんご"],
+        ["~language", "~go", "〜ご"],
+        ["what", "nan", "なん"],
+        ["so", "sou", "そう"],
+        ["No, it isn’t./You are wrong.", "chigaimasu", "ちがいます"],
+        ["I see./Is that so?", "soudesuka", "そうですか"],
+        ["well", "anou", "あのう"],
+        ["It’s nothing./It’s a token of my gratitude.", "honno kimchi desu", "ほんのきもちです"],
+        ["Please./Here you are.", "douzo", "どうぞ"],
+        ["Well thanks.", "doumo", "どうも"],
+        ["Thank you (very much)", "(doumo) arigatou (gozaimasu)", "(どうも)ありがとう(ございます)"],
+        ["I hope for your kind assistance hereafter.", "korekara osewani narimasu", "これからおせわになります"],
+        ["I am pleased to meet you too.", "kochirakoso yoroshiku", "こちらこそ　よろしく"]
+    ]];
 
+    let selected = [1];
+
+    let vocabulary = []
+
+
+
+
+    let makeHidable = () => {
+
+        document.querySelectorAll('.romanji').forEach(i => {
+            i.addEventListener('click', () => {
+                if (i.style.opacity == '' || i.style.opacity == 1) {
+                    i.style.opacity = 0;
+                } else {
+                    i.style.opacity = 1;
+                }
+            })
+        })
+    }
     let render = () => {
         document.querySelector('table').innerHTML = `<thead>
                 <th>Hiragana</th>
@@ -102,21 +178,27 @@
                 <td class="romanji">${i[0]}</td>
                 </tr>`
         })
+        makeHidable()
     }
+    document.querySelectorAll('.page').forEach(i => {
+        i.addEventListener('click', () => {
+            if (i.classList.contains('active')) {
+                i.classList.remove('active')
+                selected.splice(selected.indexOf(+i.textContent), 1);
+                updateSelected()
+                render()
+            } else {
+                i.classList.add('active')
+                selected.push(+i.textContent);
+                console.log(selected);
+                updateSelected()
+            }
+        })
+    })
+
+
 
     render()
-    let makeHidable = () => {
-
-        document.querySelectorAll('.romanji').forEach(i => {
-            i.addEventListener('click', () => {
-                if (i.style.opacity == '' || i.style.opacity == 1) {
-                    i.style.opacity = 0;
-                } else {
-                    i.style.opacity = 1;
-                }
-            })
-        })
-    }
 
     let hideAll = () => {
         document.querySelectorAll('.romanji').forEach(i => {
@@ -147,10 +229,22 @@
     let randomize = () => {
         shuffle(vocabulary)
         render()
-        makeHidable()
+        // makeHidable()
         hideAll()
     }
-    makeHidable()
+
+    let updateSelected = () => {
+        vocabulary = []
+        selected.forEach(i => {
+            data[i - 1].forEach(j => {
+                vocabulary.push(j);
+            })
+        })
+        render()
+    }
+
+    updateSelected()
+    // makeHidable()
     hideAll()
 
 </script>
