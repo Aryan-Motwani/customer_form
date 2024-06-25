@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family and Houses</title>
+    <style>
+        .mygrid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .item {
+            height: auto;
+            width: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #000;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .item img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        .item-text {
+            font-size: 20px;
+            margin: 5px 0;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #000;
+            color: white;
+            cursor: pointer;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Family and Houses</h1>
+    <div id="back-container"></div>
+    <div id="grid-container" class="mygrid"></div>
+
+    <script>
+        let people = [
+            { name: "Aryan Motwani", family: "motwani", house: "175", img: "8", number: 123, main: true, gender: "M" },
+            { name: "Vishal Motwani", family: "motwani", house: "175", img: "1", number: 123, main: false, gender: "M" },
+            { name: "Renu Motwani", family: "motwani", house: "175", img: "2", number: 123, main: false, gender: "F" },
+            { name: "Mehak Motwani", family: "motwani", house: "175", img: "3", number: 123, main: false, gender: "F" },
+            { name: "Heeradevi Motwani", family: "motwani", house: "175", img: "3", number: 123, main: false, gender: "F" },
+            { name: "Suresh Motwani", family: "motwani", house: "176", img: "7", number: 123, main: true, gender: "M" },
+            { name: "Sangeeta Motwani", family: "motwani", house: "176", img: "6", number: 123, main: false, gender: "F" },
+            { name: "Alka Motwani", family: "motwani", house: "176A", img: "6", number: 123, main: false, gender: "F" },
+            { name: "Pushpa Motwani", family: "motwani", house: "176A", img: "6", number: 123, main: false, gender: "F" },
+            { name: "Arshita Motwani", family: "motwani", house: "176A", img: "6", number: 123, main: false, gender: "F" },
+            { name: "Sumeet Motwani", family: "motwani", house: "176A", img: "6", number: 123, main: true, gender: "M", },
+            { name: "Ashok Motwani", family: "motwani", house: "176A", img: "6", number: 123, main: false, gender: "M", },
+            { name: "Pushpa Motwani", family: "motwani", house: "176A", img: "6", number: 123, main: false, gender: "F" },
+            { name: "Jayesh Dayalni", family: "dayalani", house: "121", img: "4", number: 123, main: false, gender: "M" },
+            { name: "Rajesh Dayalni", family: "dayalani", house: "121", img: "5", number: 123, main: true, gender: "M" },
+            { name: "Karan Dayalni", family: "dayalani", house: "other", img: "", number: 123, main: false, gender: "M" },
+        ];
+
+        const gridContainer = document.getElementById('grid-container');
+        const backContainer = document.getElementById('back-container');
+        let history = [];
+
+        // Step 1: Display unique family names
+        const uniqueFamilies = [...new Set(people.map(person => person.family))];
+        displayGrid(uniqueFamilies, 'family');
+
+        function displayGrid(items, type, family = null) {
+            gridContainer.innerHTML = ''; // Clear previous grid
+            backContainer.innerHTML = ''; // Clear previous back button
+
+            if (history.length > 0) {
+                const backButton = document.createElement('div');
+                backButton.classList.add('back-button');
+                backButton.textContent = 'Back';
+                backButton.addEventListener('click', handleBack);
+                backContainer.appendChild(backButton);
+            }
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('item');
+
+                if (type === 'person') {
+                    const person = people.find(p => p.name === item);
+                    div.innerHTML = `
+            <img src="https://raw.githubusercontent.com/brovfx/imgs/main/img/${person.img}.png" alt="${person.name}">
+            <span class="item-text">${person.name}</span>
+            <span class="item-text">Number: ${person.number}</span>
+            <span class="item-text">House: ${person.house}</span>
+            <span class="item-text">Gender: ${person.gender == "M" ? `Male` : `Female`}</span>
+        `;
+                } else if (type === 'house') {
+                    const mainPerson = people.find(p => p.house === item && p.main);
+                    if (mainPerson) {
+                        div.innerHTML = `
+                <img src="https://raw.githubusercontent.com/brovfx/imgs/main/img/${mainPerson.img}.png" alt="${mainPerson.name}">
+                <span class="item-text">${item}</span>
+            `;
+                    } else {
+                        div.innerHTML = `<span class="item-text">${item}</span>`;
+                    }
+                    div.addEventListener('click', () => handleClick(item, type, family));
+                } else {
+                    div.innerHTML = `<span class="item-text">${item}</span>`;
+                    div.addEventListener('click', () => handleClick(item, type, family));
+                }
+
+                gridContainer.appendChild(div);
+            });
+
+        }
+
+        function handleClick(item, type, family) {
+            history.push({ type, family });
+            if (type === 'family') {
+                const uniqueHouses = [...new Set(people.filter(person => person.family === item).map(person => person.house))];
+                displayGrid(uniqueHouses, 'house', item);
+            } else if (type === 'house') {
+                const familyMembers = people.filter(person => person.family === family && person.house === item).map(person => person.name);
+                displayGrid(familyMembers, 'person');
+            }
+        }
+
+        function handleBack() {
+            const lastState = history.pop();
+            if (lastState.type === 'family') {
+                displayGrid(uniqueFamilies, 'family');
+            } else if (lastState.type === 'house') {
+                const uniqueHouses = [...new Set(people.filter(person => person.family === lastState.family).map(person => person.house))];
+                displayGrid(uniqueHouses, 'house', lastState.family);
+            }
+        }
+    </script>
+</body>
+
+</html>
