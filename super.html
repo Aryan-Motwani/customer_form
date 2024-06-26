@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family and Houses</title>
+    <style>
+        form {
+            text-align: center;
+            border: #000 solid 2px;
+        }
+
+        .img-upload {
+            margin-top: 1%;
+        }
+
+        .mygrid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .item {
+            height: auto;
+            width: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #000;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .item img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        .item-text {
+            font-size: 20px;
+            margin: 5px 0;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #000;
+            color: white;
+            cursor: pointer;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Family and Houses</h1>
+    <div id="back-container"></div>
+    <div id="grid-container" class="mygrid"></div>
+    <div class="img-upload">
+        <input type="file" id="fileInput" />
+        <button class="upload">Upload</button>
+
+        <h1>List Images in Folder</h1>
+        <button onclick="listImages()">List Images</button>
+        <!-- <div id="imageList"></div> -->
+    </div>
+    <form>
+        <input placeholder="name" class="form-name">
+        <p></p>
+        <input placeholder="family" class="form-family">
+        <p></p>
+        <input placeholder="house" class="form-house">
+        <p></p>
+        <input placeholder="number" class="form-number">
+        <p></p>
+        <input placeholder="gender" class="form-gender">
+        <p></p>
+        <input placeholder="img" class="form-img">
+        <p></p>
+        <button class="submit-btn">submit</button>
+        <div id="imageList"></div>
+    </form>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import {
+            getDatabase,
+            ref,
+            set,
+            push,
+            onValue,
+        } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCci-D30yKI3fa2vKJZxDLYr2Qz_sIUgkI",
+            authDomain: "insta-a2549.firebaseapp.com",
+            projectId: "insta-a2549",
+            storageBucket: "insta-a2549.appspot.com",
+            messagingSenderId: "438343976628",
+            appId: "1:438343976628:web:da31a1f20890f49f8c39e1",
+            measurementId: "G-S6919D7SXR"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        let people = [];
+
+        const gridContainer = document.getElementById('grid-container');
+        const backContainer = document.getElementById('back-container');
+        let history = [];
+
+        // Get users from Firebase and update people array
+        function getUsers() {
+            const usersRef = ref(db, "people");
+
+            onValue(usersRef, (snapshot) => {
+                people = snapshot.val().list || [];
+                console.log(people);
+                const uniqueFamilies = [...new Set(people.map(person => person.family))];
+                displayGrid(uniqueFamilies, 'family');
+            });
+        }
+
+        // Display grid
+        function displayGrid(items, type, family = null) {
+            gridContainer.innerHTML = ''; // Clear previous grid
+            backContainer.innerHTML = ''; // Clear previous back button
+
+            if (history.length > 0) {
+                const backButton = document.createElement('div');
+                backButton.classList.add('back-button');
+                backButton.textContent = 'Back';
+                backButton.addEventListener('click', handleBack);
+                backContainer.appendChild(backButton);
+            }
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('item');
+
+                if (type === 'person') {
+                    const person = people.find(p => p.name === item);
+                    div.innerHTML = `
+                        <img src="${person.img}" alt="${person.name}">
+                        <span class="item-text">${person.name}</span>
+                        <span class="item-text">Number: ${person.number}</span>
+                        <span class="item-text">House: ${person.house}</span>
+                    `;
+                } else if (type === 'house') {
+                    const mainPerson = people.find(p => p.house === item && p.main);
+                    if (mainPerson) {
+                        div.innerHTML = `
+                            <img src="./img/${mainPerson.img}.png" alt="${mainPerson.name}">
+                            <span class="item-text">${item}</span>
+                        `;
+                    } else {
+                        div.innerHTML = `<span class="item-text">${item}</span>`;
+                    }
+                    div.addEventListener('click', () => handleClick(item, type, family));
+                } else {
+                    div.innerHTML = `<span class="item-text">${item}</span>`;
+                    div.addEventListener('click', () => handleClick(item, type, family));
+                }
+
+                gridContainer.appendChild(div);
+            });
+        }
+
+        function handleClick(item, type, family) {
+            history.push({ type, family });
+            if (type === 'family') {
+                const uniqueHouses = [...new Set(people.filter(person => person.family === item).map(person => person.house))];
+                document.querySelector('.form-family').value = item;
+                displayGrid(uniqueHouses, 'house', item);
+            } else if (type === 'house') {
+                const familyMembers = people.filter(person => person.family === family && person.house === item).map(person => person.name);
+                displayGrid(familyMembers, 'person');
+                document.querySelector('.form-house').value = item;
+            }
+        }
+
+        function handleBack() {
+            const lastState = history.pop();
+            if (lastState.type === 'family') {
+                const uniqueFamilies = [...new Set(people.map(person => person.family))];
+                displayGrid(uniqueFamilies, 'family');
+                document.querySelector('.form-family').value = '';
+            } else if (lastState.type === 'house') {
+                const uniqueHouses = [...new Set(people.filter(person => person.family === lastState.family).map(person => person.house))];
+                displayGrid(uniqueHouses, 'house', lastState.family);
+                document.querySelector('.form-house').value = '';
+            }
+        }
+
+        function showRelatives(person) {
+            history.push({ type: 'person', family: person.family });
+            const relatives = people.filter(p => p.family === person.family && p.house === person.house && p.name !== person.name);
+            displayGrid(relatives.map(r => r.name), 'person');
+        }
+
+        function findRelatives(personId) {
+            let relatives = relationships.filter(rel => rel.person1 === personId || rel.person2 === personId)
+                .map(rel => {
+                    const relatedPersonId = rel.person1 === personId ? rel.person2 : rel.person1;
+                    const relatedPerson = people.find(p => p.id === relatedPersonId);
+                    return { ...relatedPerson, relation: rel.relation };
+                });
+
+            displayRelatives(relatives);
+        }
+
+        function displayRelatives(relatives) {
+            gridContainer.innerHTML = ''; // Clear previous grid
+            relatives.forEach(relative => {
+                const div = document.createElement('div');
+                div.classList.add('item');
+                div.innerHTML = `
+            <img src="./img/${relative.img}.png" alt="${relative.name}">
+            <span class="item-text">${relative.name}</span>
+            <span class="item-text">Number: ${relative.number}</span>
+            <span class="item-text">House: ${relative.house}</span>
+            <span class="item-text">Relation: ${relative.relation}</span>
+        `;
+                div.addEventListener('click', () => findRelatives(relative.id));
+                gridContainer.appendChild(div);
+            });
+        }
+
+        // Example usage
+        // findRelatives(1); // Find and display relatives of Aryan Motwani
+        async function listImages() {
+            const folderPath = 'img'; // Folder from which to list images
+            const repoOwner = 'brovfx'; // Change this to your GitHub username
+            const repoName = 'imgs'; // Change this to your repository name
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                // Display the images in the UI
+                const imageList = document.getElementById('imageList');
+                imageList.innerHTML = ''; // Clear any existing content
+
+                data.forEach(item => {
+                    if (item.type === 'file' && item.name.match(/\.(jpg|jpeg|png|gif)$/)) {
+                        const imgElement = document.createElement('img');
+                        imgElement.src = item.download_url;
+                        imgElement.alt = item.name;
+                        imageList.classList.add('img-select')
+                        imgElement.style.width = '100px'; // Set desired width
+                        imgElement.style.height = '100px'; // Set desired height
+                        imageList.appendChild(imgElement);
+                    }
+                });
+            } catch (error) {
+                console.error('Error listing images:', error);
+            }
+        }
+
+        // upload func
+
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = async function () {
+                const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
+
+                const filePath = `img/${file.name}`; // Path where the image will be stored in the repo
+
+                const repoOwner = 'brovfx'; // Change this to your GitHub username
+                const repoName = 'imgs'; // Change this to your repository name
+                const githubToken = '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'; // Change this to your GitHub token
+
+                const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Upload ${file.name}`,
+                        content: base64String
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Image uploaded successfully!');
+                } else {
+                    const responseData = await response.json();
+                    alert(`Failed to upload image: ${responseData.message}`);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+
+        document.querySelector('.upload').addEventListener('click', uploadImage)
+        // Add an event listener for the submit button
+        document.querySelector('.submit-btn').addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent the form from submitting in the traditional way
+            const newPerson = {
+                name: document.querySelector('.form-name').value,
+                family: document.querySelector('.form-family').value,
+                house: document.querySelector('.form-house').value,
+                number: document.querySelector('.form-number').value,
+                gender: document.querySelector('.form-gender').value,
+                img: document.querySelector('.form-img').value
+            };
+
+            addPerson(newPerson);
+        });
+
+        // Function to add a new person to Firebase
+        function addPerson(newPerson) {
+            const peopleRef = ref(db, "people");
+
+            // Add the new person to the people array
+            people.push(newPerson);
+
+            // Update the people array in the Firebase database
+            set(peopleRef, { list: people })
+                .then(() => {
+                    console.log("New person added successfully!");
+                    getUsers(); // Refresh the users after adding a new one
+                })
+                .catch((error) => {
+                    console.error("Error adding new person:", error);
+                });
+        }
+
+        // Call the getUsers function to initialize the grid
+        getUsers();
+        listImages()
+        setTimeout(() => {
+            document.querySelectorAll('.img-select').forEach(i => {
+                i.addEventListener('click', (e) => {
+                    document.querySelector('.form-img').value = e.target.src;
+                })
+            })
+        }, 500);
+    </script>
+</body>
+
+</html>
