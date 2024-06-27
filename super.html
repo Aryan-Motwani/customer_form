@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family and Houses</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <style>
         form {
             text-align: center;
@@ -54,6 +55,22 @@
             cursor: pointer;
             display: inline-block;
         }
+
+        .cropper-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            max-width: 300px;
+            max-height: 300px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+        }
+
+        #cropped-image {
+            display: block;
+            margin: 20px auto;
+        }
     </style>
 </head>
 
@@ -64,7 +81,10 @@
     <div class="img-upload">
         <input type="file" id="fileInput" />
         <button class="upload">Upload</button>
-
+        <!-- <button class="edit-btn">edit</button> -->
+        <div class="cropper-container">
+            <img id="image-to-crop" style="max-width: 100%; display: none;">
+        </div>
         <h1>List Images in Folder</h1>
         <button onclick="listImages()">List Images</button>
         <!-- <div id="imageList"></div> -->
@@ -86,7 +106,9 @@
         <img class="preview-img">
     </form>
     <div id="imageList"></div>
+    <canvas id="cropped-image" style="display: none;"></canvas>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import {
@@ -95,6 +117,8 @@
             set,
             push,
             onValue,
+            update,
+            remove
         } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
         // Your web app's Firebase configuration
@@ -115,7 +139,13 @@
 
         const gridContainer = document.getElementById('grid-container');
         const backContainer = document.getElementById('back-container');
+        const fileInput = document.getElementById('fileInput');
+        const imageToCrop = document.getElementById('image-to-crop');
+        const croppedImageCanvas = document.getElementById('cropped-image');
+        let cropper;
         let history = [];
+
+        let editIdx = -1;
 
         // Get users from Firebase and update people array
         function getUsers() {
@@ -124,6 +154,7 @@
             onValue(usersRef, (snapshot) => {
                 people = snapshot.val().list || [];
                 console.log(people);
+                console.log(people[12]);
                 const uniqueFamilies = [...new Set(people.map(person => person.family))];
                 displayGrid(uniqueFamilies, 'family');
             });
@@ -153,7 +184,10 @@
                         <span class="item-text">${person.name}</span>
                         <span class="item-text">Number: ${person.number}</span>
                         <span class="item-text">House: ${person.house}</span>
+                        <button class="edit">Edit</button>
+                        <button class="delete">Delete</button>
                     `;
+
                 } else if (type === 'house') {
                     const mainPerson = people.find(p => p.house === item && p.main);
                     if (mainPerson) {
@@ -172,6 +206,41 @@
 
                 gridContainer.appendChild(div);
             });
+
+            document.querySelectorAll('.edit').forEach(i => {
+                i.addEventListener('click', (e) => {
+                    console.log(e.target.parentElement.children[1].textContent);
+                    let idx;
+                    people.forEach((i, j) => {
+                        if (i.name == e.target.parentElement.children[1].textContent) {
+                            idx = j
+                        }
+                    })
+                    editIdx = idx;
+                    let person = people[idx]
+                    document.querySelector('.form-name').value = person.name;
+                    document.querySelector('.form-family').value = person.family;
+                    document.querySelector('.form-house').value = person.house;
+                    document.querySelector('.form-number').value = person.number;
+                    document.querySelector('.form-gender').value = person.gender;
+                    document.querySelector('.form-img').value = person.img;
+                    document.querySelector('.submit-btn').textContent = "edit";
+                })
+            })
+
+            document.querySelectorAll('.delete').forEach(i => {
+                i.addEventListener('click', (e) => {
+                    let idx;
+                    people.forEach((i, j) => {
+                        if (i.name == e.target.parentElement.children[1].textContent) {
+                            idx = j
+                            if (confirm('Delete this user ?')) {
+                                deleteUser(j);
+                            }
+                        }
+                    })
+                })
+            })
         }
 
         function handleClick(item, type, family) {
@@ -234,8 +303,6 @@
             });
         }
 
-        // Example usage
-        // findRelatives(1); // Find and display relatives of Aryan Motwani
         function listImages() {
             const imagesRef = ref(db, 'images');
 
@@ -255,6 +322,7 @@
                             document.querySelector('.preview-img').src = e.target.src;
                             document.querySelector('.preview-img').style.width = '100px'; // Set desired width
                             document.querySelector('.preview-img').style.height = '100px';
+                            document.querySelector('.preview-img').style.display = '';
                         })
                         imgElement.style.width = '100px'; // Set desired width
                         imgElement.style.height = '100px'; // Set desired height
@@ -264,54 +332,96 @@
             });
         }
 
-        // upload func
-
         async function uploadImage() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (!file) {
-                alert('Please select an image to upload.');
-                return;
-            }
+            document.querySelector('.cropper-container').style.display = 'none';
 
-            const reader = new FileReader();
-            reader.onloadend = async function () {
-                const base64Image = reader.result.split(',')[1];
-                const newImageRef = push(ref(db, 'images'));
-                set(newImageRef, {
-                    name: file.name,
-                    data: base64Image
+            const canvas = cropper.getCroppedCanvas({
+                width: 300, // Set desired width
+                height: 300, // Set desired height
+            });
+            const base64Image = canvas.toDataURL('image/png').split(',')[1];
+
+            const newImageRef = push(ref(db, 'images'));
+            set(newImageRef, {
+                name: fileInput.files[0].name,
+                data: base64Image
+            })
+                .then(() => {
+                    alert('Image uploaded successfully.');
+                    listImages(); // Refresh the image list after uploading
                 })
-                    .then(() => {
-                        alert('Image uploaded successfully.');
-                        listImages(); // Refresh the image list after uploading
-                    })
-                    .catch((error) => {
-                        console.error('Error uploading image:', error);
-                    });
-            };
-
-            reader.readAsDataURL(file);
+                .catch((error) => {
+                    console.error('Error uploading image:', error);
+                });
         }
 
-
-        document.querySelector('.upload').addEventListener('click', uploadImage)
-        // Add an event listener for the submit button
-        document.querySelector('.submit-btn').addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent the form from submitting in the traditional way
-            const newPerson = {
-                name: document.querySelector('.form-name').value,
-                family: document.querySelector('.form-family').value,
-                house: document.querySelector('.form-house').value,
-                number: document.querySelector('.form-number').value,
-                gender: document.querySelector('.form-gender').value,
-                img: document.querySelector('.form-img').value
-            };
-
-            addPerson(newPerson);
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imageToCrop.src = e.target.result;
+                    imageToCrop.style.display = 'block'; // Show the image to crop
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
         });
 
-        // Function to add a new person to Firebase
+        document.querySelector('.upload').addEventListener('click', uploadImage);
+        document.querySelector('.submit-btn').addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent the form from submitting in the traditional way
+
+            if (document.querySelector('.submit-btn').textContent == 'submit') {
+
+                const newPerson = {
+                    name: document.querySelector('.form-name').value,
+                    family: document.querySelector('.form-family').value,
+                    house: document.querySelector('.form-house').value,
+                    number: document.querySelector('.form-number').value,
+                    gender: document.querySelector('.form-gender').value,
+                    img: document.querySelector('.form-img').value
+                };
+
+                addPerson(newPerson);
+            } else {
+                const peopleRef = ref(db, "people");
+
+                let editedPerson = {
+                    name: document.querySelector('.form-name').value,
+                    family: document.querySelector('.form-family').value,
+                    house: document.querySelector('.form-house').value,
+                    number: document.querySelector('.form-number').value,
+                    gender: document.querySelector('.form-gender').value,
+                    img: document.querySelector('.form-img').value
+                };
+
+                people[editIdx] = editedPerson;
+                document.querySelector('.submit-btn').textContent = 'submit'
+                set(peopleRef, { list: people })
+                    .then(() => {
+                        console.log("New person added successfully!");
+                        document.querySelector('.form-name').value = ''
+                        document.querySelector('.form-family').value = ''
+                        document.querySelector('.form-house').value = ''
+                        document.querySelector('.form-number').value = ''
+                        document.querySelector('.form-gender').value = ''
+                        document.querySelector('.form-img').value = ''
+                        document.querySelector('.preview-img').style.display = 'none'
+                        getUsers(); // Refresh the users after adding a new one
+                    })
+                    .catch((error) => {
+                        console.error("Error updating person:", error);
+                    });
+            }
+        });
+
         function addPerson(newPerson) {
             const peopleRef = ref(db, "people");
 
@@ -322,6 +432,13 @@
             set(peopleRef, { list: people })
                 .then(() => {
                     console.log("New person added successfully!");
+                    document.querySelector('.form-name').value = ''
+                    document.querySelector('.form-family').value = ''
+                    document.querySelector('.form-house').value = ''
+                    document.querySelector('.form-number').value = ''
+                    document.querySelector('.form-gender').value = ''
+                    document.querySelector('.form-img').value = ''
+                    document.querySelector('.preview-img').style.display = 'none'
                     getUsers(); // Refresh the users after adding a new one
                 })
                 .catch((error) => {
@@ -329,9 +446,55 @@
                 });
         }
 
-        // Call the getUsers function to initialize the grid
+
+        function deleteUser(deleteIdx) {
+            const peopleRef = ref(db, "people");
+
+            // Add the new person to the people array
+            people.splice(deleteIdx, 1);
+
+            // Update the people array in the Firebase database
+            set(peopleRef, { list: people })
+                .then(() => {
+                    console.log("New person added successfully!");
+                    document.querySelector('.form-name').value = ''
+                    document.querySelector('.form-family').value = ''
+                    document.querySelector('.form-house').value = ''
+                    document.querySelector('.form-number').value = ''
+                    document.querySelector('.form-gender').value = ''
+                    document.querySelector('.form-img').value = ''
+                    document.querySelector('.preview-img').style.display = 'none'
+                    getUsers(); // Refresh the users after adding a new one
+                })
+                .catch((error) => {
+                    console.error("Error adding new person:", error);
+                });
+        }
         getUsers();
-        listImages()
+        listImages();
+
+        document.querySelector('.edit-btn').addEventListener('click', () => {
+            const peopleRef = ref(db, "people");
+            let idx;
+            people.forEach((i, j) => {
+                if (i.name == "Vishal Motwani") {
+                    idx = j
+                }
+            })
+            people[idx].number = 9890009966;
+            console.log(people);
+
+            set(peopleRef, { list: people })
+                .then(() => {
+                    console.log("New person added successfully!");
+                    getUsers(); // Refresh the users after adding a new one
+                })
+                .catch((error) => {
+                    console.error("Error updating person:", error);
+                });
+
+        })
+
 
     </script>
 </body>
