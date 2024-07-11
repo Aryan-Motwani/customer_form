@@ -7,13 +7,18 @@
     <title>Family and Houses</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <style>
-        form {
+        body {
             text-align: center;
-            border: #000 solid 2px;
         }
 
-        .img-upload {
+        form {
+            text-align: center;
+            /* border: #000 solid 2px; */
+        }
+
+        .sect-image {
             margin-top: 1%;
+
         }
 
         .mygrid {
@@ -61,53 +66,113 @@
             justify-content: center;
             align-items: center;
             margin-top: 20px;
-            max-width: 300px;
-            max-height: 300px;
+            max-width: 500px;
+            max-height: 500px;
             overflow: hidden;
             border: 1px solid #ccc;
+
         }
 
         #cropped-image {
             display: block;
             margin: 20px auto;
         }
+
+        .sections {
+            text-align: center;
+            margin-bottom: 5% !important;
+        }
+
+        .section {
+            /* padding: 10px; */
+            /* margin: 20px; */
+            padding: 1%;
+            text-align: center;
+            background: #dedede;
+            cursor: pointer;
+        }
+
+        .active {
+            background: #434343;
+        }
+
+        .cropcrop {
+            margin-left: 40% !important;
+            margin-right: 40% !important;
+
+        }
+
+        .form-container {
+            /* display: grid;
+            grid-template-columns: 5fr 1fr; */
+        }
+
+        .preview-img {
+            /* margin-left: -10%; */
+        }
+
+        #back-container {
+            text-align: left;
+        }
+
+        .back-button {
+            width: 50%;
+        }
     </style>
 </head>
 
 <body>
-    <h1>Family and Houses</h1>
-    <div id="back-container"></div>
-    <div id="grid-container" class="mygrid"></div>
-    <div class="img-upload">
-        <input type="file" id="fileInput" />
-        <button class="upload">Upload</button>
-        <!-- <button class="edit-btn">edit</button> -->
-        <div class="cropper-container">
-            <img id="image-to-crop" style="max-width: 100%; display: none;">
+    <div class="container">
+        <button class="press-me">Press Me</button>
+        <h1>Family and Houses</h1>
+        <div class="sections">
+            <span class="section tab-database">Database</span>
+            <span class="section tab-form">Form</span>
+            <span class="section tab-image">Image</span>
         </div>
-        <h1>List Images in Folder</h1>
-        <button onclick="listImages()">List Images</button>
-        <!-- <div id="imageList"></div> -->
-    </div>
-    <form>
-        <input placeholder="name" class="form-name">
-        <p></p>
-        <input placeholder="family" class="form-family">
-        <p></p>
-        <input placeholder="house" class="form-house">
-        <p></p>
-        <input placeholder="number" class="form-number">
-        <p></p>
-        <input placeholder="gender" class="form-gender">
-        <p></p>
-        <input placeholder="img" class="form-img">
-        <p></p>
-        <button class="submit-btn">submit</button>
-        <img class="preview-img">
-    </form>
-    <div id="imageList"></div>
-    <canvas id="cropped-image" style="display: none;"></canvas>
+        <div class="sect-database" style="display: none;">
+            <div id="back-container"></div>
+            <div id="grid-container" class="mygrid"></div>
+        </div>
+        <div class="sect-image" style="display: none;">
+            <!-- <div class="upload-file"> -->
+            <input type="file" id="fileInput" />
+            <button class="upload">Upload</button>
+            <!-- </div> -->
+            <div class="cropcrop">
 
+                <div class="cropper-container">
+
+                    <img id="image-to-crop" style="max-width: 100%; display: none;">
+                </div>
+            </div>
+        </div>
+        <div class="sect-form" style="display: none;">
+            <div class="form-container">
+                <form>
+                    <input placeholder="name" class="form-name">
+                    <p></p>
+                    <input placeholder="family" class="form-family">
+                    <p></p>
+                    <input placeholder="house" class="form-house">
+                    <p></p>
+                    <input placeholder="number" class="form-number">
+                    <p></p>
+                    <input placeholder="gender" class="form-gender">
+                    <p></p>
+                    <input placeholder="dob" class="form-dob" type="date">
+                    <p></p>
+                    <input placeholder="img" class="form-img">
+                    <p></p>
+                    <button class="submit-btn">submit</button>
+                    <p></p>
+                    <img class="preview-img">
+                </form>
+            </div>
+            <div id="imageList"></div>
+            <canvas id="cropped-image" style="display: none;"></canvas>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -147,14 +212,31 @@
 
         let editIdx = -1;
 
+        // Current Tabing
+        let currentTab = "database";
+
+        let changeTab = (tab) => {
+            document.querySelector(`.tab-${currentTab}`).classList.remove('active');
+            document.querySelector(`.sect-${currentTab}`).style.display = 'none'
+            document.querySelector(`.tab-${tab}`).classList.add('active');
+            document.querySelector(`.sect-${tab}`).style.display = ''
+            currentTab = tab
+        }
+
+        document.querySelectorAll('.section').forEach(i => {
+            i.addEventListener('click', (e) => {
+                changeTab(e.target.textContent.toLowerCase());
+            })
+        })
+        changeTab(currentTab);
+
+
         // Get users from Firebase and update people array
         function getUsers() {
             const usersRef = ref(db, "people");
 
             onValue(usersRef, (snapshot) => {
                 people = snapshot.val().list || [];
-                console.log(people);
-                console.log(people[12]);
                 const uniqueFamilies = [...new Set(people.map(person => person.family))];
                 displayGrid(uniqueFamilies, 'family');
             });
@@ -165,11 +247,13 @@
             gridContainer.innerHTML = ''; // Clear previous grid
             backContainer.innerHTML = ''; // Clear previous back button
 
-            if (history.length > 0) {
+            if (history.length > -1) {
                 const backButton = document.createElement('div');
                 backButton.classList.add('back-button');
                 backButton.textContent = 'Back';
-                backButton.addEventListener('click', handleBack);
+                if (history.length > 0) {
+                    backButton.addEventListener('click', handleBack);
+                }
                 backContainer.appendChild(backButton);
             }
 
@@ -184,6 +268,7 @@
                         <span class="item-text">${person.name}</span>
                         <span class="item-text">Number: ${person.number}</span>
                         <span class="item-text">House: ${person.house}</span>
+                        <span class="item-text">DOB: ${person.dob}</span>
                         <button class="edit">Edit</button>
                         <button class="delete">Delete</button>
                     `;
@@ -223,6 +308,7 @@
                     document.querySelector('.form-house').value = person.house;
                     document.querySelector('.form-number').value = person.number;
                     document.querySelector('.form-gender').value = person.gender;
+                    document.querySelector('.form-dob').value = person.dob;
                     document.querySelector('.form-img').value = person.img;
                     document.querySelector('.submit-btn').textContent = "edit";
                 })
@@ -257,6 +343,7 @@
         }
 
         function handleBack() {
+
             const lastState = history.pop();
             if (lastState.type === 'family') {
                 const uniqueFamilies = [...new Set(people.map(person => person.family))];
@@ -308,36 +395,86 @@
 
             onValue(imagesRef, (snapshot) => {
                 const data = snapshot.val();
+                // data.reverse()
                 const imageList = document.getElementById('imageList');
                 imageList.innerHTML = ''; // Clear any existing content
-
+                console.log(data);
+                let objj = {};
+                let items = [];
                 for (const key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        const item = data[key];
-                        const imgElement = document.createElement('img');
-                        imgElement.src = `data:image/png;base64,${item.data}`;
-                        imgElement.alt = item.name;
-                        imgElement.addEventListener('click', (e) => {
-                            document.querySelector('.form-img').value = e.target.src;
-                            document.querySelector('.preview-img').src = e.target.src;
-                            document.querySelector('.preview-img').style.width = '100px'; // Set desired width
-                            document.querySelector('.preview-img').style.height = '100px';
-                            document.querySelector('.preview-img').style.display = '';
-                        })
-                        imgElement.style.width = '100px'; // Set desired width
-                        imgElement.style.height = '100px'; // Set desired height
-                        imageList.appendChild(imgElement);
-                    }
+                    items.push(data[key])
                 }
+                console.log(items);
+                items.reverse()
+                items.forEach(item => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = `data:image/png;base64,${item.data}`;
+                    imgElement.alt = item.name;
+                    imgElement.addEventListener('click', (e) => {
+                        document.querySelector('.form-img').value = e.target.src;
+                        document.querySelector('.preview-img').src = e.target.src;
+                        document.querySelector('.preview-img').style.width = '100px'; // Set desired width
+                        document.querySelector('.preview-img').style.height = '100px';
+                        document.querySelector('.preview-img').style.display = '';
+                    })
+                    imgElement.style.width = '100px'; // Set desired width
+                    imgElement.style.height = '100px'; // Set desired height
+                    imageList.appendChild(imgElement);
+                })
+                // for (const key in data) {
+                //     if (data.hasOwnProperty(key)) {
+                //         const item = data[key];
+                //         const imgElement = document.createElement('img');
+                //         imgElement.src = `data:image/png;base64,${item.data}`;
+                //         imgElement.alt = item.name;
+                //         imgElement.addEventListener('click', (e) => {
+                //             document.querySelector('.form-img').value = e.target.src;
+                //             document.querySelector('.preview-img').src = e.target.src;
+                //             document.querySelector('.preview-img').style.width = '100px'; // Set desired width
+                //             document.querySelector('.preview-img').style.height = '100px';
+                //             document.querySelector('.preview-img').style.display = '';
+                //         })
+                //         imgElement.style.width = '100px'; // Set desired width
+                //         imgElement.style.height = '100px'; // Set desired height
+                //         imageList.appendChild(imgElement);
+                //     }
+                // }
             });
         }
 
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imageToCrop.src = e.target.result;
+                    imageToCrop.style.display = 'block'; // Show the image to crop
+
+                    // Reset the cropper if it already exists
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    // Initialize the cropper
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                    });
+
+                    // Display the cropper container
+                    document.querySelector('.cropper-container').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         async function uploadImage() {
-            document.querySelector('.cropper-container').style.display = 'none';
+            if (!cropper) return;
 
             const canvas = cropper.getCroppedCanvas({
-                width: 300, // Set desired width
-                height: 300, // Set desired height
+                width: 500, // Set desired width
+                height: 500, // Set desired height
             });
             const base64Image = canvas.toDataURL('image/png').split(',')[1];
 
@@ -348,33 +485,27 @@
             })
                 .then(() => {
                     alert('Image uploaded successfully.');
-                    listImages(); // Refresh the image list after uploading
+
+                    // Reset the file input
+                    fileInput.value = '';
+
+                    // Hide the cropper container
+                    document.querySelector('.cropper-container').style.display = 'none';
+
+                    // Destroy the cropper instance
+                    cropper.destroy();
+                    cropper = null;
+
+                    // Refresh the image list after uploading
+                    listImages();
                 })
                 .catch((error) => {
                     console.error('Error uploading image:', error);
                 });
         }
 
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    imageToCrop.src = e.target.result;
-                    imageToCrop.style.display = 'block'; // Show the image to crop
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                    });
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
         document.querySelector('.upload').addEventListener('click', uploadImage);
+
         document.querySelector('.submit-btn').addEventListener('click', function (event) {
             event.preventDefault(); // Prevent the form from submitting in the traditional way
 
@@ -386,6 +517,7 @@
                     house: document.querySelector('.form-house').value,
                     number: document.querySelector('.form-number').value,
                     gender: document.querySelector('.form-gender').value,
+                    dob: document.querySelector('.form-dob').value,
                     img: document.querySelector('.form-img').value
                 };
 
@@ -399,6 +531,7 @@
                     house: document.querySelector('.form-house').value,
                     number: document.querySelector('.form-number').value,
                     gender: document.querySelector('.form-gender').value,
+                    dob: document.querySelector('.form-dob').value,
                     img: document.querySelector('.form-img').value
                 };
 
@@ -412,6 +545,7 @@
                         document.querySelector('.form-house').value = ''
                         document.querySelector('.form-number').value = ''
                         document.querySelector('.form-gender').value = ''
+                        document.querySelector('.form-dob').value = ''
                         document.querySelector('.form-img').value = ''
                         document.querySelector('.preview-img').style.display = 'none'
                         getUsers(); // Refresh the users after adding a new one
@@ -437,6 +571,7 @@
                     document.querySelector('.form-house').value = ''
                     document.querySelector('.form-number').value = ''
                     document.querySelector('.form-gender').value = ''
+                    document.querySelector('.form-dob').value = ''
                     document.querySelector('.form-img').value = ''
                     document.querySelector('.preview-img').style.display = 'none'
                     getUsers(); // Refresh the users after adding a new one
@@ -462,6 +597,7 @@
                     document.querySelector('.form-house').value = ''
                     document.querySelector('.form-number').value = ''
                     document.querySelector('.form-gender').value = ''
+                    document.querySelector('.form-dob').value = ''
                     document.querySelector('.form-img').value = ''
                     document.querySelector('.preview-img').style.display = 'none'
                     getUsers(); // Refresh the users after adding a new one
@@ -473,28 +609,23 @@
         getUsers();
         listImages();
 
-        document.querySelector('.edit-btn').addEventListener('click', () => {
-            const peopleRef = ref(db, "people");
-            let idx;
-            people.forEach((i, j) => {
-                if (i.name == "Vishal Motwani") {
-                    idx = j
-                }
-            })
-            people[idx].number = 9890009966;
+        document.querySelector('.press-me').addEventListener('click', () => {
             console.log(people);
+            return;
+            const peopleRef = ref(db, "people");
 
+            people.forEach(i => {
+
+            })
             set(peopleRef, { list: people })
                 .then(() => {
                     console.log("New person added successfully!");
-                    getUsers(); // Refresh the users after adding a new one
+                    getUsers();
                 })
                 .catch((error) => {
-                    console.error("Error updating person:", error);
+                    console.error("Error adding new person:", error);
                 });
-
         })
-
 
     </script>
 </body>
